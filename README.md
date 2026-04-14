@@ -5,7 +5,7 @@ A fast CLI tool to find and remove Next.js build artifacts (`.next`, `out`, `nod
 ## Installation
 
 ```bash
-go install github.com/rizkirmdhn/nextclean@latest
+go install github.com/rizkirmdhnnn/nextclean@latest
 ```
 
 Or build from source:
