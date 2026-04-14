@@ -12,12 +12,14 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -76,18 +78,39 @@ func main() {
 	}
 
 	sort.Strings(targets)
-	var totalSize int64
-	var totalDeleted int
 
+	// Preview what will be deleted and calculate total size.
+	var totalSize int64
+	fmt.Println("\nFound the following build artifacts:")
+	fmt.Println()
 	for _, p := range targets {
 		size, _ := dirSize(p)
 		totalSize += size
+		fmt.Printf("  %s (%s)\n", p, humanSize(size))
+	}
+	fmt.Println()
+	fmt.Printf("Total: %d folder(s), %s\n", len(targets), humanSize(totalSize))
+	fmt.Println()
 
-		if opts.dry {
-			fmt.Printf("[dry-run] would delete %s (%s)\n", p, humanSize(size))
-			continue
-		}
+	if opts.dry {
+		fmt.Println("Dry run complete. No files were deleted.")
+		return
+	}
 
+	// Ask for confirmation before deleting.
+	fmt.Print("Proceed with deletion? [y/N] ")
+	reader := bufio.NewReader(os.Stdin)
+	answer, _ := reader.ReadString('\n')
+	answer = strings.TrimSpace(strings.ToLower(answer))
+	if answer != "y" && answer != "yes" {
+		fmt.Println("Aborted.")
+		return
+	}
+
+	fmt.Println()
+	var totalDeleted int
+	for _, p := range targets {
+		size, _ := dirSize(p)
 		start := time.Now()
 		if err := os.RemoveAll(p); err != nil {
 			fmt.Fprintf(os.Stderr, "  failed: %s -> %v\n", p, err)
@@ -98,11 +121,7 @@ func main() {
 	}
 
 	fmt.Println("------")
-	if opts.dry {
-		fmt.Printf("Dry run: %d folder(s), %s total.\n", len(targets), humanSize(totalSize))
-	} else {
-		fmt.Printf("Done: removed %d folder(s), freed ~%s.\n", totalDeleted, humanSize(totalSize))
-	}
+	fmt.Printf("Done: removed %d folder(s), freed ~%s.\n", totalDeleted, humanSize(totalSize))
 }
 
 func parseFlags() options {
