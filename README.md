@@ -4,14 +4,25 @@ A fast CLI tool to find and remove Next.js build artifacts (`.next`, `out`, `nod
 
 ## Installation
 
+### Quick install (macOS/Linux)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rizkirmdhnnn/nextclean/main/install.sh | sh
+```
+
+### With Go
+
 ```bash
 go install github.com/rizkirmdhnnn/nextclean@latest
 ```
 
-Or build from source:
+### From source
 
 ```bash
+git clone https://github.com/rizkirmdhnnn/nextclean.git
+cd nextclean
 go build -o nextclean .
+sudo mv nextclean /usr/local/bin/
 ```
 
 ## Usage
@@ -59,7 +70,14 @@ When scanning the entire disk, nextclean:
 2. Skips irrelevant directories (`.git`, `Library`, `System`, `node_modules`, etc.) for speed
 3. Collects all `.next` directories found
 4. Only collects `out` directories when the parent has a `next.config.*` file or a `.next` sibling — avoiding false positives from non-Next.js projects
-5. Reports total size freed after cleanup
+5. Asks for confirmation before deleting
+6. Reports total size freed after cleanup
+
+## Uninstall
+
+```bash
+rm $(which nextclean)
+```
 
 ## License
 
