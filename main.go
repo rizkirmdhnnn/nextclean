@@ -31,9 +31,22 @@ func main() {
 		exitf("%q is not a directory\n", opts.root)
 	}
 
-	// The interactive TUI is wired up in a later task; for now everything uses
-	// the plain-text path.
-	runPlain(opts)
+	// Interactive TUI is the default. Fall back to plain text for the
+	// non-interactive modes (-dry / -y) or when stdout is not a terminal.
+	if opts.dry || opts.yes || !isTTY() {
+		runPlain(opts)
+		return
+	}
+	runTUI(opts)
+}
+
+// isTTY reports whether stdout is connected to an interactive terminal.
+func isTTY() bool {
+	fi, err := os.Stdout.Stat()
+	if err != nil {
+		return false
+	}
+	return fi.Mode()&os.ModeCharDevice != 0
 }
 
 func parseFlags() options {
